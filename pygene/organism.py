@@ -268,10 +268,12 @@ class Organism(BaseOrganism):
         for name, cls in self.genome.items():
 
             ourGene = self.genes.get(name, None)
+            #ourGene = self.genes.get(name,cls())
             if not ourGene:
                 ourGene = cls()
 
-            partnerGene = partner.genes.get(name, None)
+            partnerGene = partner.genes.get(name,None)
+            partnerGene = partner.genes.get(name,cls())
             if not partnerGene:
                 partnerGene = cls()
 

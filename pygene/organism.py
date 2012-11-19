@@ -70,7 +70,7 @@ class BaseOrganism(PGXmlMixin):
         """
         raise Exception("Method 'fitness' not implemented")
 
-    def prepare_fitness(self):
+    def prepare_fitness(self,fit=None):
         """
         Is called on all organisms before asking them for their
         fitness. This allows to calculate fitness using a parallel
@@ -80,7 +80,12 @@ class BaseOrganism(PGXmlMixin):
         Organisms using this method should usually take care to call
         it themselves in case it wasn't called before hand.
         """
-        pass
+        if fit is None:
+            pass
+        else:
+            self.fitness_cache = fit
+        #return self
+
 
     def get_fitness(self):
         """

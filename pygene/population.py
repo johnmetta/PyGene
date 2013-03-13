@@ -3,7 +3,6 @@ pygene/population.py - Represents a population of organisms
 """
 
 import random
-import pp
 from random import randrange, choice
 from math import sqrt
 
@@ -377,7 +376,6 @@ class Population_Parallel(Population):
 
         # add in some new random organisms, if required
         if self.numNewOrganisms:
-            #print "adding %d new organisms" % self.numNewOrganisms
             for i in xrange(self.numNewOrganisms):
                 self.add(self.__class__())
 
@@ -416,9 +414,6 @@ class Population_Parallel(Population):
         if self.incest:
             self.children.extend(self[:self.incest])
 
-
-        #children.sort()
-
         # and add in some mutants, a proportion of the children
         # with a bias toward the fittest
         if not self.mutateAfterMating:
@@ -431,10 +426,8 @@ class Population_Parallel(Population):
                 for i in xrange(numMutants):
                     # pick one parent randomly, favouring fittest
                     idx = int(sqrt(randrange(n2children)))
-                    #child = children[nchildren - idx - 1]
                     child = self.children[-idx]
                     mutant = child.mutate()
-                    #mutant.prepare_fitness()
                     mutants.append(mutant)
             else:
                 for i in xrange(numMutants):
@@ -447,10 +440,6 @@ class Population_Parallel(Population):
         #preparing the children's fitness in a parallel way
 
         self.prepare_next()
-        
-        #calc_datas = map(lambda child:child.calc_data(),children)
-        #fitnesses  = pool.map(self.fitfunc,calc_datas)
-        #map(lambda child,fit:child.prepare_fitness(fit),children,fitnesses)
 
         #parallel part#######################################
 

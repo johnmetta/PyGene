@@ -10,6 +10,10 @@ from organism import Organism, BaseOrganism
 
 from xmlio import PGXmlMixin
 
+
+def calc_fitness(org,cls):
+    return cls.fitness(org)
+
 class Population(PGXmlMixin):
     """
     Represents a population of organisms
@@ -346,3 +350,105 @@ class Population(PGXmlMixin):
         # dump out organisms
         for org in self.organisms:
             org.xmlDumpSelf(doc, pop)
+
+
+
+class Population_Parallel(Population):
+    def __init__(self,*items,**kw):
+        super(Population_Parallel,self).__init__(*items,**kw)
+        if 'globals_' in kw:
+            self.globals_ = kw['globals_']
+    def prepare_this(self):
+        '''prepare this generations's organisms' fitness'''
+        pass
+    def prepare_next(self):
+        '''perpare the children's fitness'''
+        pass
+
+    def gen(self, nfittest=None, nchildren=None):
+
+        if not nfittest:
+            nfittest = self.childCull
+        if not nchildren:
+            nchildren = self.childCount
+
+        self.children = []
+
+        # add in some new random organisms, if required
+        if self.numNewOrganisms:
+            for i in xrange(self.numNewOrganisms):
+                self.add(self.__class__())
+
+        # we use square root to skew the selection probability to
+        # the fittest
+
+        # get in order, if not already
+        self.prepare_this()
+        self.sort()
+        nadults = len(self)
+
+        n2adults = nadults * nadults
+
+
+        # wild orgy, have lots of children
+        for i in xrange(nchildren):
+            # pick one parent randomly, favouring fittest
+            idx1 = idx2 = int(sqrt(randrange(n2adults)))
+            parent1 = self[-idx1]
+
+            # pick another parent, distinct from the first parent
+            while idx2 == idx1:
+                idx2 = int(sqrt(randrange(n2adults)))
+            parent2 = self[-idx2]
+
+            child1, child2 = parent1 + parent2
+
+            # mutate kids if required
+            if self.mutateAfterMating:
+                child1 = child1.mutate()
+                child2 = child2.mutate()
+
+            self.children.extend([child1, child2])
+
+        # if incestuous, add in best adults
+        if self.incest:
+            self.children.extend(self[:self.incest])
+
+        # and add in some mutants, a proportion of the children
+        # with a bias toward the fittest
+        if not self.mutateAfterMating:
+            nchildren = len(self.children)
+            n2children = nchildren * nchildren
+            mutants = []
+            numMutants = int(nchildren * self.mutants)
+
+            if 1:
+                for i in xrange(numMutants):
+                    # pick one parent randomly, favouring fittest
+                    idx = int(sqrt(randrange(n2children)))
+                    child = self.children[-idx]
+                    mutant = child.mutate()
+                    mutants.append(mutant)
+            else:
+                for i in xrange(numMutants):
+                    mutant = self.children[i].mutate()
+                    mutant.prepare_fitness()
+                    mutants.append(mutant)
+
+            children.extend(mutants)
+
+        #preparing the children's fitness in a parallel way
+
+        self.prepare_next()
+
+        #parallel part#######################################
+
+        self.children.sort()
+
+        # sort the children by fitness
+
+        # take the best 'nfittest', make them the new population
+        self.organisms[:] = self.children[:nfittest]
+
+        self.sorted = True
+

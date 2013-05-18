@@ -10,6 +10,7 @@ These genes work via classical Mendelian genetics
 
 import sys, new
 from random import random, randint, uniform, choice
+from utils import medial
 from math import sqrt
 
 from xmlio import PGXmlMixin
@@ -164,18 +165,8 @@ class ComplexGene(BaseGene):
 
         # if the gene has wandered outside the alphabet,
         # rein it back in
-        real = self.value.real
-        imag = self.value.imag
-
-        if real < self.randMin:
-            real = self.randMin
-        elif real > self.randMax:
-            real = self.randMax
-
-        if imag < self.randMin:
-            imag = self.randMin
-        elif imag > self.randMax:
-            imag = self.randMax
+        real = medial(self.value.real,self.randMin,self.randMax)
+        imag = medial(self.value.imag,self.randMin,self.randMax)
 
         self.value = complex(real, imag)
 
@@ -186,8 +177,6 @@ class ComplexGene(BaseGene):
 
         Override as needed
         """
-        min = self.randMin
-        range = self.randMax - min
 
         real = uniform(self.randMin, self.randMax)
         imag = uniform(self.randMin, self.randMax)
@@ -333,10 +322,7 @@ class IntGene(BaseGene):
 
         # if the gene has wandered outside the alphabet,
         # rein it back in
-        if self.value < self.randMin:
-            self.value = self.randMin
-        elif self.value > self.randMax:
-            self.value = self.randMax
+        self.value = medial(self.value,self.randMin,self.randMax)
 
     def randomValue(self):
         """
@@ -381,8 +367,10 @@ class CharGene(BaseGene):
     def __repr__(self):
         """
         Returns safely printable value
+        update by longlongji:str() is not necessary,
+        since all(map(lambda i:str(chr(i)) == chr(i),range(0,256))) is True
         """
-        return str(self.value)
+        return self.value
 
     def mutate(self):
         """
@@ -394,10 +382,7 @@ class CharGene(BaseGene):
 
         # if the gene has wandered outside the alphabet,
         # rein it back in
-        if self.value < self.randMin:
-            self.value = self.randMin
-        elif self.value > self.randMax:
-            self.value = self.randMax
+        self.value = medial(self.value,self.randMin,self.randMax)
 
     def randomValue(self):
         """
